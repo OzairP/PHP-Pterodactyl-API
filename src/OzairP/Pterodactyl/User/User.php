@@ -13,6 +13,7 @@ use Exception;
 use InvalidArgumentException;
 use OzairP\Pterodactyl\Conduit;
 use OzairP\Pterodactyl\Util\PterodactylRequest;
+use OzairP\Pterodactyl\Util\Util;
 
 class User
 {
@@ -31,7 +32,9 @@ class User
     public static function get ($conduit, $uid = NULL)
     {
         if (!($conduit instanceof Conduit)) throw new InvalidArgumentException('Expected $conduit to be instanceof Conduit');
-        if ($uid !== NULL && !is_numeric($uid)) throw new InvalidArgumentException('Expected $uid to be type int or null');
+        Util::expect(['uid' => $uid], [
+            'uid' => 'NULL|integer',
+        ]);
 
         $uri = 'admin/users' . (($uid !== NULL) ? '/' . $uid : '');
         $request = new PterodactylRequest($conduit);
@@ -41,32 +44,23 @@ class User
         return json_decode($response);
     }
 
-    public static function create ($conduit, $email, $username, $name_first, $name_last, $password = NULL, $root_admin = FALSE, $custom_id = NULL)
+    public static function create ($conduit, $fields)
     {
         if (!($conduit instanceof Conduit)) throw new InvalidArgumentException('Expected $conduit to be instanceof Conduit');
-        if (!is_string($email)) throw new InvalidArgumentException('Expected $email to be type string');
-        if (!is_string($username)) throw new InvalidArgumentException('Expected $username to be type string');
-        if (!is_string($name_first)) throw new InvalidArgumentException('Expected $name_first to be type string');
-        if (!is_string($name_last)) throw new InvalidArgumentException('Expected $name_last to be type string');
-        if ($password !== NULL && !is_string($password)) throw new InvalidArgumentException('Expected $password to be type string or null');
-        if (!is_bool($root_admin)) throw new InvalidArgumentException('Expected $root_admin to be type string');
-        if ($custom_id !== NULL && !is_numeric($password)) throw new InvalidArgumentException('Expected $custom_id to be type int or null');
-
-        $payload = array(
-            'email'      => $email,
-            'username'   => $username,
-            'name_first' => $name_first,
-            'name_last'  => $name_last,
-            'root_admin' => $root_admin,
-        );
-
-        if ($password !== NULL) $payload['password'] = $password;
-        if ($custom_id !== NULL) $password['custom_id'] = $custom_id;
+        Util::expect($fields, [
+            'email'      => 'string',
+            'username'   => 'string',
+            'name_first' => 'string',
+            'name_last'  => 'string',
+            'root_admin' => 'boolean',
+            'password'   => 'NULL|string',
+            'custom_id'  => 'NULL|integer',
+        ]);
 
         $request = new PterodactylRequest($conduit);
         $response = $request->to('admin/users')
                             ->posts()
-                            ->with($payload)
+                            ->with($fields)
                             ->send();
 
         return json_decode($response);
@@ -75,8 +69,16 @@ class User
     public static function update ($conduit, $uid, $fields)
     {
         if (!($conduit instanceof Conduit)) throw new InvalidArgumentException('Expected $conduit to be instanceof Conduit');
-        if (!is_numeric($uid)) throw new InvalidArgumentException('Expected $uid to be type int');
-        if (!is_array($fields)) throw new InvalidArgumentException('Expected $fields to be type array');
+        Util::expect(array_merge($fields, ['uid' => $uid]), [
+            'uid'        => 'NULL|integer',
+            'email'      => 'NULL|string',
+            'username'   => 'NULL|string',
+            'name_first' => 'NULL|string',
+            'name_last'  => 'NULL|string',
+            'root_admin' => 'NULL|boolean',
+            'password'   => 'NULL|string',
+            'custom_id'  => 'NULL|integer',
+        ]);
 
         $request = new PterodactylRequest($conduit);
         $response = $request->to('admin/users/' . $uid)
@@ -90,13 +92,16 @@ class User
     public static function delete ($conduit, $uid)
     {
         if (!($conduit instanceof Conduit)) throw new InvalidArgumentException('Expected $conduit to be instanceof Conduit');
-        if (!is_numeric($uid)) throw new InvalidArgumentException('Expected $uid to be type int');
+        Util::expect(['uid' => $uid], [
+            'uid' => 'NULL|integer',
+        ]);
 
         $request = new PterodactylRequest($conduit);
-        $response = $request->to('admin/users/' . $uid)
-                            ->with(array(
-                                'id' => $uid,
-                            ))
+        $response = $request->to('admin/users/' . $uid)// Ptero expects ID to be included in HMAC
+        // in DELETE but not GET ¯\_(ツ)_/¯
+                            ->with([
+            'id' => $uid,
+        ])
                             ->deletes()
                             ->send();
 

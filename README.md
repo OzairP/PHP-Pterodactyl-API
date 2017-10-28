@@ -11,6 +11,11 @@
 No good wrappers for the Pterodactyl API with all the
 kinks from bad documentation worked out.
 
+## Requirements
+* Pterodactyl 0.6.4
+* PHP 5.6+
+* PHP ext-curl
+
 ## Install
 **Unavailable on Packagist at the moment**
 
@@ -46,13 +51,19 @@ User::get($conduit);
 User::get($conduit, 1);
  
 // Create a user
-User::create($conduit, 'ozairpatel2@gmail.com', 'opatel', 'Ozair', 'Patel', null, true);
+User::create($conduit, [
+    'email' => 'ozairpatel3@gmail.com',
+    'username' => 'opatel1',
+    'name_first' => 'Ozair',
+    'name_last' => 'Patel',
+    'root_admin' => true
+]);
  
 // Update a user
-User::update($conduit, 2, array(
- 'name_first' => 'Ohzair'
-));
- 
+User::update($conduit, 4, [
+    'name_first' => 'ohzair'
+]);
+  
 // Delete user
 User::delete($conduit, 2);
 ```
