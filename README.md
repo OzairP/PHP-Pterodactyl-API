@@ -30,6 +30,11 @@ kinks from bad documentation worked out.
 include('vendor/autoload.php');
 ```
 
+### Fixes
+Some methods require fixing the Pterodactyl code itself.
+These can be find on the wiki at https://github.com/OzairP/PHP-Pterodactyl-API/wiki/Edits
+
+
 ### Conduit
 The Conduit object is your connection details
 to your Pterodactyl system.
