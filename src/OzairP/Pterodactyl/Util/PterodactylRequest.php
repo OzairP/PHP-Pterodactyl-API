@@ -15,27 +15,29 @@ use OzairP\Pterodactyl\Conduit;
 class PterodactylRequest extends Request
 {
 
-    protected $conduit;
+	protected $conduit;
 
-    public function __construct ($conduit)
-    {
-        if (!($conduit instanceof Conduit)) throw new InvalidArgumentException('Expected $conduit to be instanceof Conduit');
+	public function __construct ($conduit)
+	{
+		if (!($conduit instanceof Conduit)) {
+			throw new InvalidArgumentException('Expected $conduit to be instanceof Conduit');
+		}
 
-        $this->conduit = $conduit;
+		$this->conduit = $conduit;
 
-        parent::__construct();
-    }
+		parent::__construct();
+	}
 
-    public function to ($url)
-    {
-        return parent::to($this->conduit->to($url));
-    }
+	public function to ($url)
+	{
+		return parent::to($this->conduit->to($url));
+	}
 
-    public function send ()
-    {
-        $this->headers->add('Authorization', 'Bearer ' . $this->conduit->token($this->payload, $this->url));
+	public function send ()
+	{
+		$this->headers->add('Authorization', 'Bearer ' . $this->conduit->token($this->payload, $this->url));
 
-        return parent::send();
-    }
+		return parent::send();
+	}
 
 }
